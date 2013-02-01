@@ -19,11 +19,11 @@ Lingua::RO::Numbers - Converts numeric values into their Romanian string equival
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 
 =cut
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 our %table = (
               0  => 'zero',
@@ -43,7 +43,7 @@ our %table = (
               14 => 'paisprezece',
               15 => 'cincisprezece',
               16 => 'șaisprezece',
-              17 => 'saptesprezece',
+              17 => 'șaptesprezece',
               18 => 'optsprezece',
               19 => 'nouăsprezece',
              );
