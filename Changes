@@ -1,5 +1,8 @@
 Revision history for Lingua-RO-Numbers
 
+0.04    02 February 2013
+        Corrected 112_000 from 'o sută doisprezece de mii' to 'o sută doisprezece mii'
+
 0.03    02 February 2013
         Require perl>=5.006 in Build.PL
 

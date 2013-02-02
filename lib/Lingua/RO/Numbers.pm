@@ -19,11 +19,11 @@ Lingua::RO::Numbers - Converts numeric values into their Romanian string equival
 
 =head1 VERSION
 
-Version 0.03
+Version 0.04
 
 =cut
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 our %table = (
               0  => 'zero',
@@ -137,6 +137,7 @@ sub number_to_ro {
 
             if ($number >= $bignums[$j - 1][0] && $number < $bignums[$j][0]) {
                 my $cat = int $number / $bignums[$j - 1][0];
+                $number -= $bignums[$j - 1][0] * int($number / $bignums[$j - 1][0]);
 
                 my @of = $cat < 2 ? 0 : do {
                     my @w = exists $table{$cat} ? $table{$cat} : (number_to_ro($cat), 'de');
@@ -146,12 +147,17 @@ sub number_to_ro {
                     @w;
                 };
 
+                if ($cat >= 100 && $cat < 1_000) {
+                    if (@of and exists $table{$cat - 100 * int($cat / 100)}) {
+                        splice @of, -1;    # remove 'de'
+                    }
+                }
+
                 push @words,
                     $cat == 1 ? ($bignums[$j - 1][1]{fem} ? 'o' : 'un', $bignums[$j - 1][1]{sg})
                   : $cat == 2 ? ($doua, $bignums[$j - 1][1]{pl})
                   :             (@of,   $bignums[$j - 1][1]{pl});
 
-                $number -= $bignums[$j - 1][0] * int($number / $bignums[$j - 1][0]);
                 push @words, number_to_ro($number) if $number > 0;
                 last;
             }
@@ -172,7 +178,6 @@ sub number_to_ro {
 
     return wantarray ? @words : @words ? join(' ', @words) : ();
 }
-
 
 =head1 AUTHOR
 
