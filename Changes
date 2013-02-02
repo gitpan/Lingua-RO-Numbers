@@ -1,5 +1,8 @@
 Revision history for Lingua-RO-Numbers
 
+0.03    02 February 2013
+        Require perl>=5.006 in Build.PL
+
 0.02    02 February 2013
         Changed 'saptesprezece' to 'șaptesprezece'
 

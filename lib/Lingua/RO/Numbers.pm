@@ -19,11 +19,11 @@ Lingua::RO::Numbers - Converts numeric values into their Romanian string equival
 
 =head1 VERSION
 
-Version 0.02
+Version 0.03
 
 =cut
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 our %table = (
               0  => 'zero',
@@ -131,7 +131,7 @@ sub number_to_ro {
     elsif (exists $table{$number}) {                     # example: 8
         push @words, $table{$number};
     }
-    elsif ($number >= $bignums[0][0]) {                  # e.g.: >= 100
+    elsif ($number >= $bignums[0][0]) {                  # i.e.: >= 100
         foreach my $i (0 .. $#bignums - 1) {
             my $j = $#bignums - $i;
 
