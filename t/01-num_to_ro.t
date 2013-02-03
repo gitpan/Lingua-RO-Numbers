@@ -5,7 +5,7 @@ use encoding qw(UTF-8);
 use warnings FATAL => 'all';
 use Test::More;
 
-plan tests => 13;
+plan tests => 14;
 
 BEGIN {
     use_ok('Lingua::RO::Numbers') || print "Bail out!\n";
@@ -22,4 +22,5 @@ BEGIN {
     is(scalar Lingua::RO::Numbers::number_to_ro(120_000),     'o sută douăzeci de mii');
     is(scalar Lingua::RO::Numbers::number_to_ro(1_012_000),   'un milion doisprezece mii');
     is(scalar Lingua::RO::Numbers::number_to_ro(102_000_000), 'o sută două milioane');
+    is(scalar Lingua::RO::Numbers::number_to_ro(1_500_083),   'un milion cinci sute de mii optzeci și trei');
 }

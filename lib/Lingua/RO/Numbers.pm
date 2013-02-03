@@ -19,11 +19,11 @@ Lingua::RO::Numbers - Converts numeric values into their Romanian string equival
 
 =head1 VERSION
 
-Version 0.04
+Version 0.05
 
 =cut
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 our %table = (
               0  => 'zero',
@@ -147,7 +147,7 @@ sub number_to_ro {
                     @w;
                 };
 
-                if ($cat >= 100 && $cat < 1_000) {
+                if ($cat >= 100 && $cat < 1_000 && $number == 0) {
                     if (@of and exists $table{$cat - 100 * int($cat / 100)}) {
                         splice @of, -1;    # remove 'de'
                     }
