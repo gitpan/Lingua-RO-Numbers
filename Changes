@@ -1,18 +1,23 @@
 Revision history for Lingua-RO-Numbers
 
+0.04    04 February 2013
+        - Added more tests.
+        - Changed from 'un miliard o sută nouăzeci și opt de milioane trei sute mii'
+                   to  'un miliard o sută nouăzeci și opt de milioane trei sute de mii'
+
 0.04    03 February 2013
-        Corrected 1_500_083 from 'un milion cinci sute mii optzeci și trei' to
-                                 'un milion cinci sute de mii optzeci și trei'
+        - Corrected 1_500_083 from 'un milion cinci sute mii optzeci și trei'
+                                to 'un milion cinci sute de mii optzeci și trei'
 
 0.04    02 February 2013
-        Corrected 112_000 from 'o sută doisprezece de mii' to
-                               'o sută doisprezece mii'
+        - Corrected 112_000 from 'o sută doisprezece de mii'
+                              to 'o sută doisprezece mii'
 
 0.03    02 February 2013
-        Require perl>=5.006 in Build.PL
+        - Require perl>=5.006 in Build.PL
 
 0.02    02 February 2013
-        Changed 'saptesprezece' to 'șaptesprezece'
+        - Changed 'saptesprezece' to 'șaptesprezece'
 
 0.01    01 February 2013
-        First version, released on an unsuspecting world.
+        - First version, released on an unsuspecting world.
