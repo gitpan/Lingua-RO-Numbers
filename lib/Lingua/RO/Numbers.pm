@@ -3,8 +3,9 @@ package Lingua::RO::Numbers;
 use strict;
 use warnings;
 use encoding qw(UTF-8);
-use parent qw(Exporter);
 
+require Exporter;
+our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw(number_to_ro);
 
 our $doua      = 'două';
@@ -19,11 +20,11 @@ Lingua::RO::Numbers - Converts numeric values into their Romanian string equival
 
 =head1 VERSION
 
-Version 0.06
+Version 0.07
 
 =cut
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 our %table = (
               0  => 'zero',
