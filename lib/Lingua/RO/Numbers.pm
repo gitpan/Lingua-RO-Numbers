@@ -20,11 +20,11 @@ Lingua::RO::Numbers - Converts numeric values into their Romanian string equival
 
 =head1 VERSION
 
-Version 0.07
+Version 0.08
 
 =cut
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 our %table = (
               0  => 'zero',
@@ -105,34 +105,31 @@ sub number_to_ro {
         push @words, $minus;
         push @words, number_to_ro(abs($number));
     }
-    elsif ($number < 1 && $number != 0) {    # example: 0.123
-        push @words, $table{0};
-        push @words, $dec_point;
+    elsif ($number != int($number)) {    # example: 0.123 or 12.43
         my $l = length($number) - 2;
 
-        until ($number == int($number)) {
-            $number *= 10;
-            $l--;
-            $number = sprintf("%.${l}f", $number);    # because of imprecise multiplication
-            push @words, $table{0} if $number < 1;
-        }
-        push @words, number_to_ro(int $number);
-    }
-    elsif ($number > 1 and $number != int($number)) {    # example: 12.43
-        my $l = length($number) - length(int $number) - 1;
-        if ($l < 1) {
+        if ((length($number) - length(int $number) - 1) < 1) {    # special case
             push @words, number_to_ro(sprintf("%.0f", $number));
         }
         else {
-            my $diff = sprintf("%.${l}f", $number - int($number));
-            push @words, number_to_ro(int($number));
-            push @words, number_to_ro($diff);
+            push @words, number_to_ro(int $number);
+            push @words, $dec_point;
+
+            $number -= int $number;
+
+            until ($number == int($number)) {
+                $number *= 10;
+                $l--;
+                $number = sprintf("%.${l}f", $number);            # because of imprecise multiplication
+                push @words, $table{0} if $number < 1;
+            }
+            push @words, number_to_ro(int $number);
         }
     }
-    elsif (exists $table{$number}) {                     # example: 8
+    elsif (exists $table{$number}) {                              # example: 8
         push @words, $table{$number};
     }
-    elsif ($number >= $bignums[0][0]) {                  # i.e.: >= 100
+    elsif ($number >= $bignums[0][0]) {                           # i.e.: >= 100
         foreach my $i (0 .. $#bignums - 1) {
             my $j = $#bignums - $i;
 
@@ -140,7 +137,7 @@ sub number_to_ro {
                 my $cat = int $number / $bignums[$j - 1][0];
                 $number -= $bignums[$j - 1][0] * int($number / $bignums[$j - 1][0]);
 
-                my @of = $cat < 2 ? 0 : do {
+                my @of = $cat <= 2 ? 0 : do {
                     my @w = exists $table{$cat} ? $table{$cat} : (number_to_ro($cat), 'de');
                     if (@w > 2) {
                         $w[-2] = $doua if $w[-2] eq $table{2};
@@ -169,13 +166,6 @@ sub number_to_ro {
         my $cat = int $number / 10;
         push @words, ($cat == 2 ? $doua : $cat == 6 ? 'șai' : $table{$cat}) . 'zeci',
           ($number % 10 != 0 ? ('și', $table{$number % 10}) : ());
-    }
-
-    for my $i (2 .. $#words) {
-        if ($words[$i] eq $dec_point and $words[$i - 1] eq $table{0} and $words[$i - 2] ne $minus) {
-            splice(@words, $i - 1, 1);
-            last;
-        }
     }
 
     return wantarray ? @words : @words ? join(' ', @words) : ();

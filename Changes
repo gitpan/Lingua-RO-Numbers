@@ -1,5 +1,10 @@
 Revision history for Lingua-RO-Numbers
 
+0.08    08 February 2013
+        - Great unification:
+            Joined the code for floating points smaller than zero,
+              with the code for floating points greater than zero.
+
 0.07    06 February 2013
         - doesn't use 'parent' anymore.
 
