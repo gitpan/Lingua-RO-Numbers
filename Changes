@@ -1,5 +1,8 @@
 Revision history for Lingua-RO-Numbers
 
+0.09    14 February 2013
+        - Added 'encoding' to dependencies in Build.PL
+
 0.08    08 February 2013
         - Great unification:
             Joined the code for floating points smaller than zero,

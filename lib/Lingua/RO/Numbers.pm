@@ -20,11 +20,11 @@ Lingua::RO::Numbers - Converts numeric values into their Romanian string equival
 
 =head1 VERSION
 
-Version 0.08
+Version 0.09
 
 =cut
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 our %table = (
               0  => 'zero',
@@ -52,16 +52,16 @@ our %table = (
 # See: http://ro.wikipedia.org/wiki/Sistem_zecimal#Denumiri_ale_numerelor
 
 our @bignums = (
-                [10**2, {sg => 'sută', pl => "sute", fem => 1}],
-                [10**3, {sg => 'mie',   pl => 'mii',  fem => 1}],
-                [10**6,  {sg => 'milion',      pl => 'milioane'}],
-                [10**9,  {sg => 'miliard',     pl => 'miliarde'}],
-                [10**12, {sg => 'bilion',      pl => 'bilioane'}],
-                [10**15, {sg => 'biliard',     pl => 'biliarde'}],
-                [10**18, {sg => 'trilion',     pl => 'trilioane'}],
-                [10**21, {sg => 'triliard',    pl => 'triliarde'}],
-                [10**24, {sg => 'cvadrilion',  pl => 'cvadrilioane'}],
-                [10**27, {sg => 'cvadriliard', pl => 'cvadriliarde'}],
+                {num => 10**2,  sg => 'sută',        pl => "sute", fem => 1},
+                {num => 10**3,  sg => 'mie',         pl => 'mii',  fem => 1},
+                {num => 10**6,  sg => 'milion',      pl => 'milioane'},
+                {num => 10**9,  sg => 'miliard',     pl => 'miliarde'},
+                {num => 10**12, sg => 'bilion',      pl => 'bilioane'},
+                {num => 10**15, sg => 'biliard',     pl => 'biliarde'},
+                {num => 10**18, sg => 'trilion',     pl => 'trilioane'},
+                {num => 10**21, sg => 'triliard',    pl => 'triliarde'},
+                {num => 10**24, sg => 'cvadrilion',  pl => 'cvadrilioane'},
+                {num => 10**27, sg => 'cvadriliard', pl => 'cvadriliarde'},
                );
 
 =head1 SYNOPSIS
@@ -129,15 +129,15 @@ sub number_to_ro {
     elsif (exists $table{$number}) {                              # example: 8
         push @words, $table{$number};
     }
-    elsif ($number >= $bignums[0][0]) {                           # i.e.: >= 100
+    elsif ($number >= $bignums[0]{num}) {                         # i.e.: >= 100
         foreach my $i (0 .. $#bignums - 1) {
             my $j = $#bignums - $i;
 
-            if ($number >= $bignums[$j - 1][0] && $number < $bignums[$j][0]) {
-                my $cat = int $number / $bignums[$j - 1][0];
-                $number -= $bignums[$j - 1][0] * int($number / $bignums[$j - 1][0]);
+            if ($number >= $bignums[$j - 1]{num} && $number < $bignums[$j]{num}) {
+                my $cat = int $number / $bignums[$j - 1]{num};
+                $number -= $bignums[$j - 1]{num} * int($number / $bignums[$j - 1]{num});
 
-                my @of = $cat <= 2 ? 0 : do {
+                my @of = $cat <= 2 ? () : do {
                     my @w = exists $table{$cat} ? $table{$cat} : (number_to_ro($cat), 'de');
                     if (@w > 2) {
                         $w[-2] = $doua if $w[-2] eq $table{2};
@@ -153,9 +153,9 @@ sub number_to_ro {
                 }
 
                 push @words,
-                    $cat == 1 ? ($bignums[$j - 1][1]{fem} ? 'o' : 'un', $bignums[$j - 1][1]{sg})
-                  : $cat == 2 ? ($doua, $bignums[$j - 1][1]{pl})
-                  :             (@of,   $bignums[$j - 1][1]{pl});
+                    $cat == 1 ? ($bignums[$j - 1]{fem} ? 'o' : 'un', $bignums[$j - 1]{sg})
+                  : $cat == 2 ? ($doua, $bignums[$j - 1]{pl})
+                  :             (@of,   $bignums[$j - 1]{pl});
 
                 push @words, number_to_ro($number) if $number > 0;
                 last;
