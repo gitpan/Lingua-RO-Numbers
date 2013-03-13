@@ -1,5 +1,12 @@
 Revision history for Lingua-RO-Numbers
 
+0.10    13 March 2013
+        - Added support for Object-Oriented functionality.
+        - Added support for customizable options.
+        - Fixed deep-recursion for number which is, actually, "NaN".
+        - Added support for 'inf'.
+        - Doesn't returns a list in list context, but a string.
+
 0.09    14 February 2013
         - Added 'encoding' to dependencies in Build.PL
 

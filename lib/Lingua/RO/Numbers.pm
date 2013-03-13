@@ -8,10 +8,6 @@ require Exporter;
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw(number_to_ro);
 
-our $doua      = 'două';
-our $minus     = 'minus';
-our $dec_point = 'virgulă';
-
 =encoding utf8
 
 =head1 NAME
@@ -20,39 +16,30 @@ Lingua::RO::Numbers - Converts numeric values into their Romanian string equival
 
 =head1 VERSION
 
-Version 0.09
+Version 0.10
 
 =cut
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
-our %table = (
-              0  => 'zero',
-              1  => 'unu',
-              2  => 'doi',
-              3  => 'trei',
-              4  => 'patru',
-              5  => 'cinci',
-              6  => 'șase',
-              7  => 'șapte',
-              8  => 'opt',
-              9  => 'nouă',
-              10 => 'zece',
-              11 => 'unsprezece',
-              12 => 'doisprezece',
-              13 => 'treisprezece',
-              14 => 'paisprezece',
-              15 => 'cincisprezece',
-              16 => 'șaisprezece',
-              17 => 'șaptesprezece',
-              18 => 'optsprezece',
-              19 => 'nouăsprezece',
-             );
+our %DIGITS;
+@DIGITS{0 .. 19} = qw(
+  zero unu doi trei patru cinci șase șapte opt nouă zece
+  unsprezece
+  doisprezece
+  treisprezece
+  paisprezece
+  cincisprezece
+  șaisprezece
+  șaptesprezece
+  optsprezece
+  nouăsprezece
+  );
 
 # See: http://ro.wikipedia.org/wiki/Sistem_zecimal#Denumiri_ale_numerelor
 
-our @bignums = (
-                {num => 10**2,  sg => 'sută',        pl => "sute", fem => 1},
+our @BIGNUMS = (
+                {num => 10**2,  sg => 'sută',        pl => 'sute', fem => 1},
                 {num => 10**3,  sg => 'mie',         pl => 'mii',  fem => 1},
                 {num => 10**6,  sg => 'milion',      pl => 'milioane'},
                 {num => 10**9,  sg => 'miliard',     pl => 'miliarde'},
@@ -67,10 +54,10 @@ our @bignums = (
 =head1 SYNOPSIS
 
  use Lingua::RO::Numbers qw(number_to_ro);
- print scalar number_to_ro(315);
+ print number_to_ro(315);
  # prints 'trei sute cincisprezece'
 
- print scalar number_to_ro(325.12)
+ print number_to_ro(325.12)
  # prints 'trei sute douăzeci și cinci virgulă doisprezece'
 
 =head1 DESCRIPTION
@@ -86,34 +73,113 @@ Nothing is exported by default. The following function is exported.
 
 =over
 
+=item B<new(;%opt)>
+
+Initialize an object.
+
+    my $obj = Lingua::RO::Numbers->new();
+
+is equivalent with:
+
+    my $obj = Lingua::RO::Numbers->new(
+                      diacritics          => 1,
+                      invalid_number      => undef,
+                      negative_sign       => 'minus',
+                      decimal_point       => 'virgulă',
+                      thousands_separator => '',
+                      infinity            => 'infinit',
+                      not_a_number        => 'NaN',
+              );
+
 =item B<number_to_ro($number)>
 
 Converts a number to its Romanian string representation.
 
-  $string = number_to_ro($number);  # returns a string
-  @array = number_to_ro($number);   # returns a list
+  # Functional oriented usage
+  $string = number_to_ro($number);
+  $string = number_to_ro($number, %opts);
+
+  # Object oriented usage
+  my $obj = Lingua::RO::Numbers(%opts);
+  $string = $obj->number_to_ro($number);
+
+  # Example:
+  print number_to_ro(98_765, thousands_separator => q{,});
+    # says: 'nouăzeci și opt de mii, șapte sute șaizeci și cinci'
 
 =back
 
 =cut
 
+sub new {
+    my ($class, %opts) = @_;
+
+    my $self = bless {
+                      diacritics          => 1,
+                      invalid_number      => undef,
+                      negative_sign       => 'minus',
+                      decimal_point       => 'virgulă',
+                      thousands_separator => '',
+                      infinity            => 'infinit',
+                      not_a_number        => 'NaN',
+                     }, $class;
+
+    foreach my $key (keys %{$self}) {
+        if (exists $opts{$key}) {
+            $self->{$key} = delete $opts{$key};
+        }
+    }
+
+    foreach my $invalid_key (keys %opts) {
+        warn "Invalid option: <$invalid_key>";
+    }
+
+    return $self;
+}
+
 sub number_to_ro {
-    my ($number) = @_;
+    my ($self, $number, %opts);
+
+    if (ref $_[0] eq __PACKAGE__) {
+        ($self, $number) = @_;
+    }
+    else {
+        ($number, %opts) = @_;
+        $self = __PACKAGE__->new(%opts);
+    }
+
+    my $word_number = $self->_number_to_ro($number);
+
+    if (not $self->{diacritics}) {
+        $word_number =~ tr{ăâșțî}{aasti};
+    }
+
+    return $word_number;
+}
+
+sub _number_to_ro {
+    my ($self, $number) = @_;
 
     my @words;
-    if ($number < 0) {    # example: -43
-        push @words, $minus;
-        push @words, number_to_ro(abs($number));
+    if (exists $DIGITS{$number}) {    # example: 8
+        push @words, $DIGITS{$number};
+    }
+    elsif ($number + 0 eq 'nan') {    # not a number (NaN)
+        return $self->{not_a_number};
+    }
+    elsif ($number < 0) {             # example: -43
+        push @words, $self->{negative_sign};
+        push @words, $self->_number_to_ro(abs($number));
     }
     elsif ($number != int($number)) {    # example: 0.123 or 12.43
         my $l = length($number) - 2;
 
         if ((length($number) - length(int $number) - 1) < 1) {    # special case
-            push @words, number_to_ro(sprintf("%.0f", $number));
+            push @words, $self->_number_to_ro(sprintf('%.0f', $number));
         }
         else {
-            push @words, number_to_ro(int $number);
-            push @words, $dec_point;
+            push @words, $self->_number_to_ro(int $number);
+            push @words, $self->{decimal_point};
 
             $number -= int $number;
 
@@ -121,51 +187,55 @@ sub number_to_ro {
                 $number *= 10;
                 $l--;
                 $number = sprintf("%.${l}f", $number);            # because of imprecise multiplication
-                push @words, $table{0} if $number < 1;
+                push @words, $DIGITS{0} if $number < 1;
             }
-            push @words, number_to_ro(int $number);
+            push @words, $self->_number_to_ro(int $number);
         }
     }
-    elsif (exists $table{$number}) {                              # example: 8
-        push @words, $table{$number};
-    }
-    elsif ($number >= $bignums[0]{num}) {                         # i.e.: >= 100
-        foreach my $i (0 .. $#bignums - 1) {
-            my $j = $#bignums - $i;
+    elsif ($number >= $BIGNUMS[0]{num}) {                         # i.e.: >= 100
+        foreach my $i (0 .. $#BIGNUMS - 1) {
+            my $j = $#BIGNUMS - $i;
 
-            if ($number >= $bignums[$j - 1]{num} && $number < $bignums[$j]{num}) {
-                my $cat = int $number / $bignums[$j - 1]{num};
-                $number -= $bignums[$j - 1]{num} * int($number / $bignums[$j - 1]{num});
+            if ($number >= $BIGNUMS[$j - 1]{num} && $number < $BIGNUMS[$j]{num}) {
+                my $cat = int $number / $BIGNUMS[$j - 1]{num};
+                $number -= $BIGNUMS[$j - 1]{num} * int($number / $BIGNUMS[$j - 1]{num});
 
                 my @of = $cat <= 2 ? () : do {
-                    my @w = exists $table{$cat} ? $table{$cat} : (number_to_ro($cat), 'de');
+                    my @w = exists $DIGITS{$cat} ? $DIGITS{$cat} : ($self->_number_to_ro($cat), 'de');
                     if (@w > 2) {
-                        $w[-2] = $doua if $w[-2] eq $table{2};
+                        $w[-2] = 'două' if $w[-2] eq $DIGITS{2};
                     }
                     @w;
                 };
 
                 if ($cat >= 100 && $cat < 1_000) {
                     my $rest = $cat - 100 * int($cat / 100);
-                    if (@of and $rest != 0 and exists $table{$rest}) {
+                    if (@of and $rest != 0 and exists $DIGITS{$rest}) {
                         splice @of, -1;    # remove 'de'
                     }
                 }
 
                 push @words,
-                    $cat == 1 ? ($bignums[$j - 1]{fem} ? 'o' : 'un', $bignums[$j - 1]{sg})
-                  : $cat == 2 ? ($doua, $bignums[$j - 1]{pl})
-                  :             (@of,   $bignums[$j - 1]{pl});
+                    $cat == 1 ? ($BIGNUMS[$j - 1]{fem} ? 'o' : 'un', $BIGNUMS[$j - 1]{sg})
+                  : $cat == 2 ? ('două', $BIGNUMS[$j - 1]{pl})
+                  :             (@of, $BIGNUMS[$j - 1]{pl});
 
-                push @words, number_to_ro($number) if $number > 0;
+                $words[-1] .= $self->{thousands_separator} if $BIGNUMS[$j]{num} > 1_000;
+                push @words, $self->_number_to_ro($number) if $number > 0;
                 last;
             }
         }
     }
     elsif ($number > 19 && $number < 100) {    # example: 42
         my $cat = int $number / 10;
-        push @words, ($cat == 2 ? $doua : $cat == 6 ? 'șai' : $table{$cat}) . 'zeci',
-          ($number % 10 != 0 ? ('și', $table{$number % 10}) : ());
+        push @words, ($cat == 2 ? 'două' : $cat == 6 ? 'șai' : $DIGITS{$cat}) . 'zeci',
+          ($number % 10 != 0 ? ('și', $DIGITS{$number % 10}) : ());
+    }
+    elsif ($number == 'inf') {                 # number is infinit
+        return $self->{infinity};
+    }
+    else {                                     # doesn't look like a number
+        return $self->{invalid_number};
     }
 
     return wantarray ? @words : @words ? join(' ', @words) : ();
