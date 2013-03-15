@@ -16,11 +16,11 @@ Lingua::RO::Numbers - Converts numeric values into their Romanian string equival
 
 =head1 VERSION
 
-Version 0.10
+Version 0.11
 
 =cut
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 our %DIGITS;
 @DIGITS{0 .. 19} = qw(
@@ -69,7 +69,7 @@ just like Lingua::IT::Numbers, importing the B<number_to_ro> function.
 
 =head2 EXPORT
 
-Nothing is exported by default. The following function is exported.
+Nothing is exported by default. Only the function B<number_to_ro()> is exportable.
 
 =over
 
@@ -100,7 +100,7 @@ Converts a number to its Romanian string representation.
   $string = number_to_ro($number, %opts);
 
   # Object oriented usage
-  my $obj = Lingua::RO::Numbers(%opts);
+  my $obj = Lingua::RO::Numbers->new(%opts);
   $string = $obj->number_to_ro($number);
 
   # Example:

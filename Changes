@@ -1,41 +1,46 @@
 Revision history for Lingua-RO-Numbers
 
-0.10    13 March 2013
+0.11    2013-03-15
+        - Added kwalitee test.
+        - Converted released dates to W3CDTF.
+        - Added META.yml file.
+
+0.10    2013-03-13
         - Added support for Object-Oriented functionality.
         - Added support for customizable options.
         - Fixed deep-recursion for number which is, actually, "NaN".
         - Added support for 'inf'.
         - Doesn't returns a list in list context, but a string.
 
-0.09    14 February 2013
+0.09    2013-02-14
         - Added 'encoding' to dependencies in Build.PL
 
-0.08    08 February 2013
+0.08    2013-02-08
         - Great unification:
             Joined the code for floating points smaller than zero,
               with the code for floating points greater than zero.
 
-0.07    06 February 2013
+0.07    2013-02-06
         - doesn't use 'parent' anymore.
 
-0.06    04 February 2013
+0.06    2013-02-04
         - Added more tests.
         - Changed from 'un miliard o sută nouăzeci și opt de milioane trei sute mii'
                    to  'un miliard o sută nouăzeci și opt de milioane trei sute de mii'
 
-0.05    03 February 2013
+0.05    2013-02-03
         - Corrected 1_500_083 from 'un milion cinci sute mii optzeci și trei'
                                 to 'un milion cinci sute de mii optzeci și trei'
 
-0.04    02 February 2013
+0.04    2013-02-03
         - Corrected 112_000 from 'o sută doisprezece de mii'
                               to 'o sută doisprezece mii'
 
-0.03    02 February 2013
+0.03    2013-02-02
         - Require perl>=5.006 in Build.PL
 
-0.02    02 February 2013
+0.02    2013-02-02
         - Changed 'saptesprezece' to 'șaptesprezece'
 
-0.01    01 February 2013
+0.01    2013-02-01
         - First version, released on an unsuspecting world.
