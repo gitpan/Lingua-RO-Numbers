@@ -1,7 +1,7 @@
 #!perl -T
 use 5.006;
 use strict;
-use encoding qw(UTF-8);
+use utf8;
 use warnings FATAL => 'all';
 use Test::More;
 

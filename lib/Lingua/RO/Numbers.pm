@@ -1,8 +1,8 @@
 package Lingua::RO::Numbers;
 
+use utf8;
 use strict;
 use warnings;
-use encoding qw(UTF-8);
 
 require Exporter;
 our @ISA       = qw(Exporter);
@@ -16,11 +16,11 @@ Lingua::RO::Numbers - Converts numeric values into their Romanian string equival
 
 =head1 VERSION
 
-Version 0.11
+Version 0.12
 
 =cut
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 
 our %DIGITS;
 @DIGITS{0 .. 19} = qw(
@@ -243,7 +243,7 @@ sub _number_to_ro {
 
 =head1 AUTHOR
 
-Suteu "Trizen" Daniel, C<< <trizenx at gmail.com> >>
+Șuteu "Trizen" Daniel, C<< <trizenx at gmail.com> >>
 
 =head1 BUGS
 
@@ -290,7 +290,7 @@ L<http://search.cpan.org/dist/Lingua-RO-Numbers/>
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright 2013 Suteu "Trizen" Daniel.
+Copyright 2013 Șuteu "Trizen" Daniel.
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of the the Artistic License (2.0). You may obtain a

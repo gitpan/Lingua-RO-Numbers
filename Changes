@@ -1,8 +1,11 @@
 Revision history for Lingua-RO-Numbers
 
+0.12    2013-06-09
+        - Removed the usage of the deprecated 'encoding' pragma.
+
 0.11    2013-03-15
         - Added kwalitee test.
-        - Converted released dates to W3CDTF.
+        - Converted releases dates to W3CDTF.
         - Added META.yml file.
 
 0.10    2013-03-13

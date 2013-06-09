@@ -16,10 +16,10 @@ name: Lingua-RO-Numbers
 provides:
   Lingua::RO::Numbers:
     file: lib/Lingua/RO/Numbers.pm
-    version: 0.10
+    version: 0.12
 requires:
   encoding: 0
   perl: 5.006
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.10
+version: 0.12
