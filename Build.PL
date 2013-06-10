@@ -16,8 +16,8 @@ my $builder = Module::Build->new(
                        'Test::More' => 0,
                       },
     requires => {
-                 'perl'     => 5.006,
-                 'encoding' => 0,
+                 'perl' => 5.006,
+                 'utf8' => 0,
                 },
     add_to_cleanup     => ['Lingua-RO-Numbers-*'],
     create_makefile_pl => 'traditional',
