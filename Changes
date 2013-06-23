@@ -1,5 +1,9 @@
 Revision history for Lingua-RO-Numbers
 
+0.14    2013-06-23
+        - Removed the kwalitee test.
+	- Added the META.json file.
+
 0.13    2013-06-09
         - Removed the requirement of the 'encoding' pragma.
 

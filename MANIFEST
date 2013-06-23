@@ -3,11 +3,11 @@ Changes
 Build.PL
 META.yml
 ignore.txt
+META.json
 Debian_CPANTS.txt
 MANIFEST
 t/01-num_to_ro.t
 t/pod.t
-t/kwalitee.t
 t/manifest.t
 t/00-load.t
 t/pod-coverage.t
