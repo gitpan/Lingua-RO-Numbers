@@ -1,8 +1,11 @@
 Revision history for Lingua-RO-Numbers
 
+0.15    2013-11-05
+        - Bug-fix: the 'thousands_separator' string should not be added at the end of a number.
+
 0.14    2013-06-23
         - Removed the kwalitee test.
-	- Added the META.json file.
+        - Added the META.json file.
 
 0.13    2013-06-09
         - Removed the requirement of the 'encoding' pragma.

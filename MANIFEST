@@ -1,14 +1,14 @@
-README
-Changes
 Build.PL
-META.yml
+Changes
 ignore.txt
-META.json
-Debian_CPANTS.txt
-MANIFEST
-t/01-num_to_ro.t
-t/pod.t
-t/manifest.t
-t/00-load.t
-t/pod-coverage.t
 lib/Lingua/RO/Numbers.pm
+Makefile.PL
+MANIFEST			This list of files
+META.json
+META.yml
+README
+t/00-load.t
+t/01-num_to_ro.t
+t/manifest.t
+t/pod-coverage.t
+t/pod.t

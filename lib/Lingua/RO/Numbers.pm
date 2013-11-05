@@ -16,14 +16,14 @@ Lingua::RO::Numbers - Converts numeric values into their Romanian string equival
 
 =head1 VERSION
 
-Version 0.14
+Version 0.15
 
 =cut
 
-our $VERSION = '0.14';
+our $VERSION = '0.15';
 
 our %DIGITS;
-@DIGITS{0 .. 19} = qw(
+@DIGITS{'0' .. '19'} = qw(
   zero unu doi trei patru cinci șase șapte opt nouă zece
   unsprezece
   doisprezece
@@ -39,7 +39,7 @@ our %DIGITS;
 # See: http://ro.wikipedia.org/wiki/Sistem_zecimal#Denumiri_ale_numerelor
 
 our @BIGNUMS = (
-                {num => 10**2,  sg => 'sută',        pl => 'sute', fem => 1},
+                {num => 10**2,  sg => 'sută',       pl => 'sute', fem => 1},
                 {num => 10**3,  sg => 'mie',         pl => 'mii',  fem => 1},
                 {num => 10**6,  sg => 'milion',      pl => 'milioane'},
                 {num => 10**9,  sg => 'miliard',     pl => 'miliarde'},
@@ -220,8 +220,11 @@ sub _number_to_ro {
                   : $cat == 2 ? ('două', $BIGNUMS[$j - 1]{pl})
                   :             (@of, $BIGNUMS[$j - 1]{pl});
 
-                $words[-1] .= $self->{thousands_separator} if $BIGNUMS[$j]{num} > 1_000;
-                push @words, $self->_number_to_ro($number) if $number > 0;
+                if ($number > 0) {
+                    $words[-1] .= $self->{thousands_separator} if $BIGNUMS[$j]{num} > 1_000;
+                    push @words, $self->_number_to_ro($number);
+                }
+
                 last;
             }
         }
@@ -243,7 +246,7 @@ sub _number_to_ro {
 
 =head1 AUTHOR
 
-Șuteu "Trizen" Daniel, C<< <trizenx at gmail.com> >>
+Daniel "Trizen" Șuteu, C<< <trizenx at gmail.com> >>
 
 =head1 BUGS
 
