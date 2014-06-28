@@ -1,5 +1,8 @@
 Revision history for Lingua-RO-Numbers
 
+0.16    2014-20-06
+        - Added the ro_to_number() function which converts a Romanian text into its numeric value.
+
 0.15    2013-11-05
         - Bug-fix: the 'thousands_separator' string should not be added at the end of a number.
 

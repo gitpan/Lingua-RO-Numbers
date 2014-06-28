@@ -10,7 +10,7 @@ plan tests => 23;
 BEGIN {
     use_ok('Lingua::RO::Numbers') || print "Bail out!\n";
 
-    my %opts = (thousands_separator => q{});     # just to make sure
+    my %opts = (thousands_separator => q{});
     my $ron = Lingua::RO::Numbers->new(%opts);
 
     my $num = 124_445_223;

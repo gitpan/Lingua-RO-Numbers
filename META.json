@@ -4,7 +4,7 @@
       "Daniel \"Trizen\" Șuteu <trizenx@gmail.com>"
    ],
    "dynamic_config" : 1,
-   "generated_by" : "Module::Build version 0.4007, CPAN::Meta::Converter version 2.132830",
+   "generated_by" : "Module::Build version 0.4205",
    "license" : [
       "perl_5"
    ],
@@ -36,7 +36,7 @@
    "provides" : {
       "Lingua::RO::Numbers" : {
          "file" : "lib/Lingua/RO/Numbers.pm",
-         "version" : "0.15"
+         "version" : "0.16"
       }
    },
    "release_status" : "stable",
@@ -45,5 +45,5 @@
          "http://dev.perl.org/licenses/"
       ]
    },
-   "version" : "0.15"
+   "version" : "0.16"
 }

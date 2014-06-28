@@ -1,12 +1,16 @@
 package Lingua::RO::Numbers;
 
+#
+## See: http://ro.wikipedia.org/wiki/Sistem_zecimal#Denumiri_ale_numerelor
+#
+
 use utf8;
 use strict;
 use warnings;
 
 require Exporter;
 our @ISA       = qw(Exporter);
-our @EXPORT_OK = qw(number_to_ro);
+our @EXPORT_OK = qw(number_to_ro ro_to_number);
 
 =encoding utf8
 
@@ -16,12 +20,13 @@ Lingua::RO::Numbers - Converts numeric values into their Romanian string equival
 
 =head1 VERSION
 
-Version 0.15
+Version 0.16
 
 =cut
 
-our $VERSION = '0.15';
+our $VERSION = '0.16';
 
+# Numbers => text
 our %DIGITS;
 @DIGITS{'0' .. '19'} = qw(
   zero unu doi trei patru cinci șase șapte opt nouă zece
@@ -36,10 +41,14 @@ our %DIGITS;
   nouăsprezece
   );
 
-# See: http://ro.wikipedia.org/wiki/Sistem_zecimal#Denumiri_ale_numerelor
+# Text => numbers
+our %WORDS;
+@WORDS{map { _remove_diacritics($_) } values %DIGITS} = keys %DIGITS;
+@WORDS{qw(o un doua sai)} = (1, 1, 2, 6);
 
+# This array contains number greater than 1000 and it's used to convert numbers into text
 our @BIGNUMS = (
-                {num => 10**2,  sg => 'sută',       pl => 'sute', fem => 1},
+                {num => 10**2,  sg => 'suta',        pl => 'sute', fem => 1},
                 {num => 10**3,  sg => 'mie',         pl => 'mii',  fem => 1},
                 {num => 10**6,  sg => 'milion',      pl => 'milioane'},
                 {num => 10**9,  sg => 'miliard',     pl => 'miliarde'},
@@ -51,25 +60,31 @@ our @BIGNUMS = (
                 {num => 10**27, sg => 'cvadriliard', pl => 'cvadriliarde'},
                );
 
+# This hash is a reversed version of the above array and it's used to convert text into numbers
+our %BIGWORDS = (map { $_->{sg} => $_->{num}, $_->{pl} => $_->{num} } @BIGNUMS);
+
+# Change 'suta' to 'sută'
+$BIGNUMS[0]{'sg'} = 'sută';
+
 =head1 SYNOPSIS
 
- use Lingua::RO::Numbers qw(number_to_ro);
+ use Lingua::RO::Numbers qw(number_to_ro ro_to_number);
  print number_to_ro(315);
- # prints 'trei sute cincisprezece'
+ # prints: 'trei sute cincisprezece'
 
- print number_to_ro(325.12)
- # prints 'trei sute douăzeci și cinci virgulă doisprezece'
+ print ro_to_number('trei sute douazeci si cinci virgula doi');
+ # prints: 325.2
 
 =head1 DESCRIPTION
 
-Lingua::RO::Numbers converts arbitrary numbers into human-oriented
-Romanian text. The interface is sligtly different from that defined
-for Lingua::EN::Numbers, for one it can be used in a procedural way,
-just like Lingua::IT::Numbers, importing the B<number_to_ro> function.
+Lingua::RO::Numbers converts arbitrary numbers into human-readable
+Romanian text and viceversa, converting arbitrary Romanian text
+into its corresponding numerical value.
 
 =head2 EXPORT
 
-Nothing is exported by default. Only the function B<number_to_ro()> is exportable.
+Nothing is exported by default.
+Only the functions B<number_to_ro()> and <B<ro_to_number()> are exportable.
 
 =over
 
@@ -109,6 +124,23 @@ Converts a number to its Romanian string representation.
 
 =back
 
+=item B<ro_to_number($text)>
+
+Converts a Romanian text into its numeric value.
+
+  # Functional oriented usage
+  $number = ro_to_number($text);
+  $number = ro_to_number($text, %opts);
+
+  # Object oriented usage
+  my $obj = Lingua::RO::Numbers->new(%opts);
+  $number = $obj->ro_to_number($text);
+
+  # Example:
+  print ro_to_number('patruzeci si doi');  # says: 42
+
+=back
+
 =cut
 
 sub new {
@@ -137,6 +169,8 @@ sub new {
     return $self;
 }
 
+# This function it's an interface to a private function
+# which converts a mathematical number into its Romanian equivalent text.
 sub number_to_ro {
     my ($self, $number, %opts);
 
@@ -151,12 +185,232 @@ sub number_to_ro {
     my $word_number = $self->_number_to_ro($number);
 
     if (not $self->{diacritics}) {
-        $word_number =~ tr{ăâșțî}{aasti};
+        $word_number = _remove_diacritics($word_number);
     }
 
     return $word_number;
 }
 
+# This function it's an interface to a private function
+# which converts a Romanian text-number into its mathematical value.
+sub ro_to_number {
+    my ($self, $number, %opts);
+
+    if (ref $_[0] eq __PACKAGE__) {
+        ($self, $number) = @_;
+    }
+    else {
+        ($number, %opts) = @_;
+        $self = __PACKAGE__->new(%opts);
+    }
+
+    my $num = $self->_ro_to_number($number);
+    return $num;
+}
+
+# This function removes the Romanian diacritics from a given text.
+sub _remove_diacritics {
+    my ($text) = @_;
+    $text =~ tr{ăâșțî}{aasti};
+    $text;
+}
+
+# This functions removes irrelevant characters from a text
+sub _normalize_text {
+
+    # Lowercase and remove the diacritics
+    my $text = _remove_diacritics(lc(shift));
+
+    # Replace irrelevant characters with a space
+    $text =~ tr/a-z / /c;
+
+    # Return the normalized text
+    $text;
+}
+
+# This function adds together a list of numbers
+sub _add_numbers {
+    my (@nums) = @_;
+
+    my $num = 0;
+    while (defined(my $i = shift @nums)) {
+
+        # When the current number is lower than the next number
+        if (@nums and $i < $nums[0]) {
+            my $n = shift @nums;
+
+            # This is a special case, where: int(log(1000)/log(10)) == 2
+            my $l = log($n) / log(10);
+            if (length($l) == length(int($l))) {
+                $l = sprintf('%.0f', $l);
+            }
+
+            # Factor (e.g.: 400 -> 4)
+            my $f = int($i / (10**int(log($i) / log(10))));
+
+            # When the next number is not really next to the current number
+            # e.g.: $i == 400 and $n == 5000 # should produce 405_000 not 45_000
+            if ((my $mod = length($n) % 3) != 0) {
+                $f *= 10**(3 - $mod);
+            }
+
+            # Join the numbers and continue
+            $num += 10**int($l) * $f + $n;
+            next;
+        }
+
+        $num += $i;
+    }
+
+    $num;
+}
+
+# This function converts a Romanian
+# text-number into a mathematical number.
+sub _ro_to_number {
+    my ($self, $text) = @_;
+
+    # When no text has been provided
+    if (not defined $text) {
+        return;
+    }
+
+    # If a thousand separator is defined, remove it from text
+    if (defined($self->{thousands_separator}) and length($self->{thousands_separator})) {
+        $text =~ s/\Q$self->{thousands_separator}\E/ /g;
+    }
+
+    # Split the text into words
+    my @words = split(' ', _normalize_text($text));
+
+    my $dec_point = _normalize_text($self->{decimal_point});
+    my $neg_sign  = _normalize_text($self->{negative_sign});
+
+    my @nums;    # numbers
+    my @decs;    # decimal numbers
+
+    my $neg  = 0;    # bool -- true when the number is negative
+    my $adec = 0;    # bool -- true after the decimal point
+
+    my $amount = 0;  # int -- current number
+    my $factor = 1;  # int -- multiplication factor
+
+    if (@words) {
+
+        # Check for infinity and NaN
+        if (@words == 1) {
+
+            # Infinity
+            my $inf = _normalize_text($self->{infinity});
+            if ($words[0] eq $inf) {
+                return $neg ? -9**9**9 : 9**9**9;
+            }
+
+            # Not a number
+            my $nan = _normalize_text($self->{not_a_number});
+            if ($words[0] eq $nan) {
+                return -sin(9**9**9);
+            }
+
+        }
+
+        # Check for negative numbers
+        elsif ($words[0] eq $neg_sign) {
+            $neg = 1;
+            shift @words;
+        }
+    }
+
+    # Iterate over the @words
+    while (
+        @words and (
+
+            # It's a small number (lower than 100)
+            do {
+                $factor = exists($WORDS{$words[0]}) ? 1 : $words[0] =~ s/zeci\z// ? 10 : 0;
+                $factor && do { $amount = shift @words };
+                $factor;
+            }
+
+            # It's a big number (e.g.: milion)
+            or @words && exists($BIGWORDS{$words[0]}) && do {
+                $factor = $BIGWORDS{shift @words};
+            }
+
+            # Ignore invalid words
+            or do {
+                shift @words;
+                next;
+            }
+        )
+      ) {
+
+        # Take and multiply the current number
+        my $num =
+          exists($WORDS{$amount})
+          ? $WORDS{$amount} * $factor
+          : next;    # skip invalid words
+
+        # Check for some word-joining tokens
+        if (@words) {
+            if ($words[0] eq 'si') {    # e.g.: patruzeci si doi
+                shift @words;
+                $num += $WORDS{shift @words};
+            }
+
+            if (@words) {
+                {
+                    if ($words[0] eq 'de') {    # e.g.: o suta de mii
+                        shift @words;
+                    }
+
+                    if (exists $BIGWORDS{$words[0]}) {
+                        $num *= $BIGWORDS{shift @words};
+                    }
+
+                    if (@words && $words[0] eq 'de') {
+                        redo;
+                    }
+                }
+            }
+        }
+
+        # If we are after the decimal point, store the
+        # numbers in @decs, otherwise store them in @nums.
+        $adec ? push(@decs, $num) : push(@nums, $num);
+
+        # Check for the decimal point
+        if (@words and $words[0] eq $dec_point) {
+            $adec = 1;
+            shift @words;
+        }
+    }
+
+    # Return undef when no number has been converted
+    @nums || return;
+
+    # Add all the numbers together (if any)
+    my $num = _add_numbers(@nums);
+
+    # If the number contains decimals,
+    # add them at the end of the number
+    if (@decs) {
+
+        # Special case -- check for leading zeros
+        my $zeros = '';
+        while ($decs[0] == 0) {
+            $zeros .= shift(@decs);
+        }
+
+        $num .= '.' . $zeros . _add_numbers(@decs);
+    }
+
+    # Return the number
+    $neg ? -$num : $num + 0;
+}
+
+# This function converts numbers
+# into their Romanian equivalent text.
 sub _number_to_ro {
     my ($self, $number) = @_;
 
@@ -164,7 +418,7 @@ sub _number_to_ro {
     if (exists $DIGITS{$number}) {    # example: 8
         push @words, $DIGITS{$number};
     }
-    elsif ($number + 0 eq 'nan') {    # not a number (NaN)
+    elsif (lc($number + 0) eq 'nan') {    # not a number (NaN)
         return $self->{not_a_number};
     }
     elsif ($number < 0) {             # example: -43
@@ -185,8 +439,7 @@ sub _number_to_ro {
 
             until ($number == int($number)) {
                 $number *= 10;
-                $l--;
-                $number = sprintf("%.${l}f", $number);            # because of imprecise multiplication
+                $number = sprintf('%.*f', --$l, $number);         # because of imprecise multiplication
                 push @words, $DIGITS{0} if $number < 1;
             }
             push @words, $self->_number_to_ro(int $number);
@@ -234,7 +487,7 @@ sub _number_to_ro {
         push @words, ($cat == 2 ? 'două' : $cat == 6 ? 'șai' : $DIGITS{$cat}) . 'zeci',
           ($number % 10 != 0 ? ('și', $DIGITS{$number % 10}) : ());
     }
-    elsif ($number == 'inf') {                 # number is infinit
+    elsif ($number == 9**9**9) {                 # number is infinit
         return $self->{infinity};
     }
     else {                                     # doesn't look like a number
@@ -253,7 +506,6 @@ Daniel "Trizen" Șuteu, C<< <trizenx at gmail.com> >>
 Please report any bugs or feature requests to C<bug-lingua-ro-numbers at rt.cpan.org>, or through
 the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Lingua-RO-Numbers>.  I will be notified, and then you'll
 automatically be notified of progress on your bug as I make changes.
-
 
 
 =head1 SUPPORT
@@ -293,7 +545,7 @@ L<http://search.cpan.org/dist/Lingua-RO-Numbers/>
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright 2013 Șuteu "Trizen" Daniel.
+Copyright 2013-2014 Daniel "Trizen" Șuteu.
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of the the Artistic License (2.0). You may obtain a
