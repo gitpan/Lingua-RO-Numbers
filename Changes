@@ -1,5 +1,8 @@
 Revision history for Lingua-RO-Numbers
 
+0.17    2014-29-06
+        - POD fixes.
+
 0.16    2014-20-06
         - Added the ro_to_number() function which converts a Romanian text into its numeric value.
 

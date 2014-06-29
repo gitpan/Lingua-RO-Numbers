@@ -17,8 +17,8 @@ BEGIN {
     is(Lingua::RO::Numbers::ro_to_number($ron->number_to_ro($num), %opts), $num);
 
     # Some random tests
-    for (2..11) {
-        my $i = int(rand(10**$_));
+    foreach my $n (2..11) {
+        my $i = int(rand(10**$n));
         is($ron->ro_to_number($ron->number_to_ro($i)), $i);
     }
 

@@ -20,11 +20,11 @@ Lingua::RO::Numbers - Converts numeric values into their Romanian string equival
 
 =head1 VERSION
 
-Version 0.16
+Version 0.17
 
 =cut
 
-our $VERSION = '0.16';
+our $VERSION = '0.17';
 
 # Numbers => text
 our %DIGITS;
@@ -84,7 +84,7 @@ into its corresponding numerical value.
 =head2 EXPORT
 
 Nothing is exported by default.
-Only the functions B<number_to_ro()> and <B<ro_to_number()> are exportable.
+Only the functions B<number_to_ro()> and B<ro_to_number()> are exportable.
 
 =over
 
@@ -121,8 +121,6 @@ Converts a number to its Romanian string representation.
   # Example:
   print number_to_ro(98_765, thousands_separator => q{,});
     # says: 'nouăzeci și opt de mii, șapte sute șaizeci și cinci'
-
-=back
 
 =item B<ro_to_number($text)>
 

@@ -3,16 +3,16 @@ require 5.006;
 use ExtUtils::MakeMaker;
 WriteMakefile
 (
-  'NAME' => 'Lingua::RO::Numbers',
   'VERSION_FROM' => 'lib/Lingua/RO/Numbers.pm',
-  'PL_FILES' => {},
-  'PREREQ_PM' => {
-                   'utf8' => 0,
-                   'strict' => 0,
-                   'Test::More' => 0,
-                   'warnings' => 0
-                 },
   'INSTALLDIRS' => 'site',
-  'EXE_FILES' => []
+  'PREREQ_PM' => {
+                   'warnings' => 0,
+                   'utf8' => 0,
+                   'Test::More' => 0,
+                   'strict' => 0
+                 },
+  'EXE_FILES' => [],
+  'NAME' => 'Lingua::RO::Numbers',
+  'PL_FILES' => {}
 )
 ;
