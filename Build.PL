@@ -24,6 +24,7 @@ my $builder = Module::Build->new(
                  'utf8'     => 0,
                  'strict'   => 0,
                  'warnings' => 0,
+		 'Encode'   => 0,
                 },
     add_to_cleanup     => ['Lingua-RO-Numbers-*'],
     create_makefile_pl => 'traditional',

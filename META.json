@@ -26,6 +26,7 @@
       },
       "runtime" : {
          "requires" : {
+            "Encode" : "0",
             "perl" : "5.006",
             "strict" : "0",
             "utf8" : "0",
@@ -36,7 +37,7 @@
    "provides" : {
       "Lingua::RO::Numbers" : {
          "file" : "lib/Lingua/RO/Numbers.pm",
-         "version" : "0.17"
+         "version" : "0.18"
       }
    },
    "release_status" : "stable",
@@ -45,5 +46,5 @@
          "http://dev.perl.org/licenses/"
       ]
    },
-   "version" : "0.17"
+   "version" : "0.18"
 }

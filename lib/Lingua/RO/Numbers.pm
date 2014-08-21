@@ -20,11 +20,11 @@ Lingua::RO::Numbers - Converts numeric values into their Romanian string equival
 
 =head1 VERSION
 
-Version 0.17
+Version 0.18
 
 =cut
 
-our $VERSION = '0.17';
+our $VERSION = '0.18';
 
 # Numbers => text
 our %DIGITS;
@@ -186,24 +186,36 @@ sub number_to_ro {
         $word_number = _remove_diacritics($word_number);
     }
 
-    return $word_number;
+    # Return the text-number
+    $word_number;
 }
 
 # This function it's an interface to a private function
 # which converts a Romanian text-number into its mathematical value.
 sub ro_to_number {
-    my ($self, $number, %opts);
+    my ($self, $text, %opts);
 
     if (ref $_[0] eq __PACKAGE__) {
-        ($self, $number) = @_;
+        ($self, $text) = @_;
     }
     else {
-        ($number, %opts) = @_;
+        ($text, %opts) = @_;
         $self = __PACKAGE__->new(%opts);
     }
 
-    my $num = $self->_ro_to_number($number);
-    return $num;
+    (    # Decode the text unless it is already UTF-8
+       $] >= 5.0080001 ? utf8::is_utf8($text) : do {
+           require Encode;
+           Encode::is_utf8($text);
+         }
+    )
+      || do {
+        require Encode;
+        $text = Encode::decode_utf8($text);
+      };
+
+    # Return the number
+    $self->_ro_to_number($text);
 }
 
 # This function removes the Romanian diacritics from a given text.
@@ -295,6 +307,12 @@ sub _ro_to_number {
 
     if (@words) {
 
+        # Check for negative numbers
+        if ($words[0] eq $neg_sign) {
+            $neg = 1;
+            shift @words;
+        }
+
         # Check for infinity and NaN
         if (@words == 1) {
 
@@ -309,13 +327,6 @@ sub _ro_to_number {
             if ($words[0] eq $nan) {
                 return -sin(9**9**9);
             }
-
-        }
-
-        # Check for negative numbers
-        elsif ($words[0] eq $neg_sign) {
-            $neg = 1;
-            shift @words;
         }
     }
 
@@ -396,7 +407,7 @@ sub _ro_to_number {
 
         # Special case -- check for leading zeros
         my $zeros = '';
-        while ($decs[0] == 0) {
+        while (@decs and $decs[0] == 0) {
             $zeros .= shift(@decs);
         }
 
@@ -419,11 +430,11 @@ sub _number_to_ro {
     elsif (lc($number + 0) eq 'nan') {    # not a number (NaN)
         return $self->{not_a_number};
     }
-    elsif ($number < 0) {             # example: -43
+    elsif ($number < 0) {                 # example: -43
         push @words, $self->{negative_sign};
         push @words, $self->_number_to_ro(abs($number));
     }
-    elsif ($number != int($number)) {    # example: 0.123 or 12.43
+    elsif ($number != int($number)) {     # example: 0.123 or 12.43
         my $l = length($number) - 2;
 
         if ((length($number) - length(int $number) - 1) < 1) {    # special case
@@ -485,7 +496,7 @@ sub _number_to_ro {
         push @words, ($cat == 2 ? 'două' : $cat == 6 ? 'șai' : $DIGITS{$cat}) . 'zeci',
           ($number % 10 != 0 ? ('și', $DIGITS{$number % 10}) : ());
     }
-    elsif ($number == 9**9**9) {                 # number is infinit
+    elsif ($number == 9**9**9) {               # number is infinit
         return $self->{infinity};
     }
     else {                                     # doesn't look like a number
