@@ -20,11 +20,11 @@ Lingua::RO::Numbers - Converts numeric values into their Romanian string equival
 
 =head1 VERSION
 
-Version 0.18
+Version 0.19
 
 =cut
 
-our $VERSION = '0.18';
+our $VERSION = '0.19';
 
 # Numbers => text
 our %DIGITS;
@@ -44,7 +44,11 @@ our %DIGITS;
 # Text => numbers
 our %WORDS;
 @WORDS{map { _remove_diacritics($_) } values %DIGITS} = keys %DIGITS;
-@WORDS{qw(o un doua sai)} = (1, 1, 2, 6);
+@WORDS{qw(o un doua cin sai ob)} = (1, 1, 2, 5, 6, 8);
+
+# Colocvial
+@WORDS{qw(unspe doispe treispe paispe cinspe cinsprezece saispe saptespe optspe nouaspe)} =
+  (11, 12, 13, 14, 15, 15, 16, 17, 18, 19);
 
 # This array contains number greater than 1000 and it's used to convert numbers into text
 our @BIGNUMS = (
@@ -180,7 +184,7 @@ sub number_to_ro {
         $self = __PACKAGE__->new(%opts);
     }
 
-    my $word_number = $self->_number_to_ro($number);
+    my $word_number = $self->_number_to_ro($number + 0);
 
     if (not $self->{diacritics}) {
         $word_number = _remove_diacritics($word_number);
@@ -427,14 +431,17 @@ sub _number_to_ro {
     if (exists $DIGITS{$number}) {    # example: 8
         push @words, $DIGITS{$number};
     }
-    elsif (lc($number + 0) eq 'nan') {    # not a number (NaN)
+    elsif (lc($number) eq 'nan') {    # not a number (NaN)
         return $self->{not_a_number};
     }
-    elsif ($number < 0) {                 # example: -43
+    elsif ($number == 9**9**9) {      # number is infinit
+        return $self->{infinity};
+    }
+    elsif ($number < 0) {             # example: -43
         push @words, $self->{negative_sign};
         push @words, $self->_number_to_ro(abs($number));
     }
-    elsif ($number != int($number)) {     # example: 0.123 or 12.43
+    elsif ($number != int($number)) {    # example: 0.123 or 12.43
         my $l = length($number) - 2;
 
         if ((length($number) - length(int $number) - 1) < 1) {    # special case
@@ -495,9 +502,6 @@ sub _number_to_ro {
         my $cat = int $number / 10;
         push @words, ($cat == 2 ? 'două' : $cat == 6 ? 'șai' : $DIGITS{$cat}) . 'zeci',
           ($number % 10 != 0 ? ('și', $DIGITS{$number % 10}) : ());
-    }
-    elsif ($number == 9**9**9) {               # number is infinit
-        return $self->{infinity};
     }
     else {                                     # doesn't look like a number
         return $self->{invalid_number};
